@@ -1,6 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
 const colors = require("colors");
+const db = require("./config/db");
 
 //load environment variables
 dotenv.config({ path: "./config/config.env" });
@@ -11,7 +13,21 @@ const app = express();
 //Json Body parser
 app.use(express.json());
 
-const PORT = process.env.PORT;
+//mongoDB connection
+db();
+
+//route files
+const users = require("./routes/user");
+
+//mounting routes
+app.use("/flickApi/v1/auth", users);
+
+//Dev logging middleware
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+const PORT = process.env.PORT || 5000;
 
 app.listen(
   PORT,
