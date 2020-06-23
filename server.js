@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
 const db = require("./config/db");
+const errorHanlder = require("./middleware/error");
 
 //load environment variables
 dotenv.config({ path: "./config/config.env" });
@@ -21,6 +22,9 @@ const users = require("./routes/user");
 
 //mounting routes
 app.use("/flickApi/v1/auth", users);
+
+//error handler
+app.use(errorHanlder);
 
 //Dev logging middleware
 if (process.env.NODE_ENV === "development") {
