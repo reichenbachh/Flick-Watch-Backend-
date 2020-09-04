@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
 const db = require("./config/db");
+const cors = require("cors");
 const errorHanlder = require("./middleware/error");
 
 //load environment variables
@@ -11,6 +12,8 @@ dotenv.config({ path: "./config/config.env" });
 //initalizing express
 const app = express();
 
+// Allor cross origin access
+app.use(cors());
 //Json Body parser
 app.use(express.json());
 

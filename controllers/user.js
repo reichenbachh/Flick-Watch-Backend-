@@ -2,17 +2,17 @@ const User = require("../models/Users");
 const ErrorResponse = require("../utils/errorHandler");
 
 //@register POST
-//@route GET flickApi/v1/auth/regitser
+//@route POST flickApi/v1/auth/regitser
 //@acess Public
 exports.registerUser = async (req, res, next) => {
-  const { email, userName, password } = req.body;
+  const { email, username, password } = req.body;
 
   try {
     //create User
     const user = await User.create({
       email,
       password,
-      userName,
+      username,
     });
 
     //create token
@@ -24,7 +24,7 @@ exports.registerUser = async (req, res, next) => {
   } catch (error) {
     res.status(201).json({
       success: false,
-      data: error,
+      error,
     });
   }
 };
