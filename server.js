@@ -2,9 +2,11 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
+const cookie = require("cookie-parser");
 const db = require("./config/db");
 const cors = require("cors");
 const errorHanlder = require("./middleware/error");
+const User = require("./models/Users");
 
 //load environment variables
 dotenv.config({ path: "./config/config.env" });
@@ -12,10 +14,14 @@ dotenv.config({ path: "./config/config.env" });
 //initalizing express
 const app = express();
 
-// Allor cross origin access
-app.use(cors());
+//cookie parser
+app.use(cookie());
+
 //Json Body parser
 app.use(express.json());
+
+// Allor cross origin access
+app.use(cors());
 
 //mongoDB connection
 db();
@@ -47,6 +53,6 @@ app.listen(
 //Handle unhandled rejections
 process.on("unhandledRejection", (error, promise) => {
   console.log(`Error : ${error.message}`.red);
-  //close server
+  // close server
   server.close(() => process.exit(1));
 });

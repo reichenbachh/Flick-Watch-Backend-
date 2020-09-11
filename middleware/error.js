@@ -1,11 +1,26 @@
+//importing error response class
+const errorResponse = require("../utils/errorResponse");
+
 const errorHandler = (err, req, res, next) => {
   //log to console for developer
   console.log(err.stack.red);
 
-  res.status(err.statusCode || 500).json({
+  let error = { ...err };
+  error.message = err.message;
+
+  if (error.code === 11000) {
+    const message = `These credentials already exist`;
+    res.status(error.statusCode || 500).json({
+      sucess: false,
+      message,
+      error,
+    });
+  }
+  res.status(error.statusCode || 500).json({
     sucess: false,
-    error: err.message || "server error",
+    error: error.message || "server error",
   });
+  next();
 };
 
 module.exports = errorHandler;
