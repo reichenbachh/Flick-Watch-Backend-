@@ -89,15 +89,25 @@ exports.loginUser = async (req, res, next) => {
   }
 };
 
+exports.getLoggedInUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.id);
+    res.status(200).json({ user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 //Helper Methods
 
 //send signed web token in a cookie
 const sendCookieResponse = (statusCode, token, res) => {
   const options = {
-    maxAge: 900000,
+    maxAge: 9000000000,
     httpOnly: true,
   };
-  res.cookie("LoggedIn?", "True", options).status(statusCode).json({
+  res.cookie("token", token, options).status(statusCode).json({
     success: true,
+    token,
   });
 };
