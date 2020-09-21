@@ -12,8 +12,7 @@ const errorHandler = (err, req, res, next) => {
     const message = `These credentials already exist`;
     res.status(error.statusCode || 500).json({
       sucess: false,
-      message,
-      error,
+      error: message,
     });
   }
   res.status(error.statusCode || 500).json({

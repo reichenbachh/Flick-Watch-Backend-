@@ -28,10 +28,11 @@ exports.registerUser = async (req, res, next) => {
 
     //create token
     const token = user.getSignedJWTtoken();
-    res.status(201).json({
-      success: true,
-      token,
-    });
+    sendCookieResponse(200, token, res);
+    // res.status(201).json({
+    //   success: true,
+    //   token,
+    // });
 
     //handle other errors
   } catch (error) {
@@ -89,6 +90,10 @@ exports.loginUser = async (req, res, next) => {
   }
 };
 
+exports.logOutUser = async (req, res, next) => {
+  sendclearCookiesResponse(200, res);
+};
+
 exports.getLoggedInUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.id);
@@ -100,10 +105,27 @@ exports.getLoggedInUser = async (req, res, next) => {
 
 //Helper Methods
 
+//clear a cookie
+const sendclearCookiesResponse = (statusCode, res) => {
+  const options = {
+    expires: new Date(
+      Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  res.clearCookie("token", options).json({
+    success: true,
+    message: "user logged out",
+  });
+};
+
 //send signed web token in a cookie
 const sendCookieResponse = (statusCode, token, res) => {
   const options = {
-    maxAge: 9000000000,
+    expires: new Date(
+      Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+    ),
     httpOnly: true,
   };
   res.cookie("token", token, options).status(statusCode).json({

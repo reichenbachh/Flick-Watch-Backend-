@@ -20,14 +20,21 @@ app.use(cookie());
 //Json Body parser
 app.use(express.json());
 
+const corsOptions = {
+  origin: "http://localhost:3000",
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  credentials: true,
+};
+
 // Allor cross origin access
-app.use(cors());
+app.use(cors(corsOptions));
 
 //mongoDB connection
 db();
 
 //route files
 const users = require("./routes/user");
+const { options } = require("./routes/user");
 
 //mounting routes
 app.use("/flickApi/v1/auth", users);
