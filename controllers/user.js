@@ -1,7 +1,9 @@
 const User = require("../models/Users");
 const ErrorResponse = require("../utils/errorResponse");
 const e = require("express");
+const sendMail = require("../utils/emailSender");
 const { options } = require("../routes/user");
+const crypto = require("crypto");
 
 //@register POST
 //@route POST flickApi/v1/auth/regitser
@@ -103,6 +105,80 @@ exports.getLoggedInUser = async (req, res, next) => {
   }
 };
 
+exports.sendResetEmail = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    if (!email) {
+      next(
+        new ErrorResponse("Please enter your flick watch email address", 404)
+      );
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      next(new ErrorResponse("This user does not exits", 404));
+    }
+
+    const token = user.createResetToken();
+    const resetUrl = `http://localhost:3000/passwordReset/${token}`;
+    user.save({ validateBeforeSave: false });
+
+    try {
+      sendMail(email, resetUrl);
+    } catch (error) {
+      console.log(error);
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      user.save({ validateBeforeSave: false });
+    }
+
+    console.log(email);
+    res
+      .status(200)
+      .json({ message: "check your email for a password reset link", token });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//reset passwords
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const reqToken = req.params.token;
+
+    //unhashed token is hashed and matched with password stored in database
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(reqToken)
+      .digest("hex");
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      next(
+        new ErrorResponse(
+          "Invalid token or password reset link has expired",
+          404
+        )
+      );
+    }
+
+    //set new password
+    const password = req.body.password;
+
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    const token = user.getSignedJWTtoken();
+    sendCookieResponse(200, token, res);
+  } catch (error) {
+    next(error);
+  }
+};
 //Helper Methods
 
 //clear a cookie
