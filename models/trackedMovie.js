@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const TrackedShowSchema = new mongoose.Schema({
+const TrackedMovieSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -20,4 +20,4 @@ const TrackedShowSchema = new mongoose.Schema({
   },
 });
 
-module.exports = TrackedShowSchema;
+module.exports = TrackedMovieSchema;

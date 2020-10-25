@@ -1,8 +1,6 @@
 const User = require("../models/Users");
 const ErrorResponse = require("../utils/errorResponse");
-const e = require("express");
 const sendMail = require("../utils/emailSender");
-const { options } = require("../routes/user");
 const crypto = require("crypto");
 
 //@register POST
@@ -75,7 +73,7 @@ exports.loginUser = async (req, res, next) => {
       const user = await User.findOne({ username }).select("+password");
 
       if (!user) {
-        return next(new ErrorResponse("Invalid credentials", 401));
+        next(new ErrorResponse("Invalid credentials", 401));
       }
       //check if password matches
       const isMatch = await user.matchPassword(password);
@@ -120,8 +118,8 @@ exports.sendResetEmail = async (req, res, next) => {
     }
 
     const token = user.createResetToken();
-    const resetUrl = `http://localhost:3000/passwordReset/${token}`;
     user.save({ validateBeforeSave: false });
+    const resetUrl = `http://localhost:3000/passwordReset/${token}`;
 
     try {
       sendMail(email, resetUrl);
@@ -152,18 +150,14 @@ exports.resetPassword = async (req, res, next) => {
       .update(reqToken)
       .digest("hex");
 
+    console.log(hashedToken);
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() },
     });
 
     if (!user) {
-      next(
-        new ErrorResponse(
-          "Invalid token or password reset link has expired",
-          404
-        )
-      );
+      return next(new ErrorResponse("Invalid or expired token", 401));
     }
 
     //set new password

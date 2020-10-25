@@ -34,11 +34,11 @@ db();
 
 //route files
 const users = require("./routes/user");
-const { options } = require("./routes/user");
+const flickList = require("./routes/flickList");
 
 //mounting routes
 app.use("/flickApi/v1/auth", users);
-
+app.use("/flickApi/v1/flickList", flickList);
 //error handler
 app.use(errorHanlder);
 
