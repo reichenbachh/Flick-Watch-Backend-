@@ -9,9 +9,10 @@ const TrackedMovieSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  language: { type: String, default: "none" },
   air_date: { type: String },
   vote_average: { type: String },
-  overview: { type: String },
   poster_path: { type: String },
   backdrop_path: { type: String },
   createdAt: {

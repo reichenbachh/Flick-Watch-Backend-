@@ -97,6 +97,11 @@ exports.logOutUser = async (req, res, next) => {
 exports.getLoggedInUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.id);
+
+    if (!user) {
+      return next(new ErrorResponse("user doesnt exists", 404));
+    }
+
     res.status(200).json({ user });
   } catch (error) {
     next(error);

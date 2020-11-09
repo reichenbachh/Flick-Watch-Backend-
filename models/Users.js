@@ -16,8 +16,8 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      minlength: [8, " A username has to be more than 8 characters"],
-      maxlength: [20, "A username cannot exceed 20 characters"],
+      minlength: [6, " A username has to be more than 8 characters"],
+      maxlength: [15, "A username cannot exceed 20 characters"],
     },
     password: {
       type: String,
@@ -32,10 +32,12 @@ const UserSchema = new mongoose.Schema(
     passwordResetToken: {
       type: String,
       default: "no token",
+      select: false,
     },
     passwordResetExpires: {
       type: Date,
       default: Date.now(),
+      select: false,
     },
     createdAt: {
       type: Date,

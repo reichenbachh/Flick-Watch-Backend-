@@ -1,8 +1,27 @@
 const flickList = require("../models/flickList");
 
+exports.getFlickList = async (req, res, next) => {
+  console.log(req.params.user);
+  try {
+    const userflickList = await flickList.findOne({ user: req.params.user });
+    if (!userflickList) {
+      res.status(200).json({
+        message: "no tracked movies",
+      });
+    }
+    if (userflickList) {
+      res.status(200).json({
+        userflickList,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.trackFlick = async (req, res, next) => {
   try {
-    let { user, payloadName, payloadData } = req.body;
+    let { user, payloadName, payloadData, tmdb_id } = req.body;
     //check if user already has a list of tracked flicks
     const listExists = await flickList.findOne({ user });
 
@@ -22,12 +41,47 @@ exports.trackFlick = async (req, res, next) => {
     }
 
     res.status(200).json({
-      message: "sucess",
+      success: true,
+      message: "flick created and added",
     });
   } catch (error) {
-    console.log(error);
+    next(error);
+  }
+};
+
+exports.deleteFromFlickList = async (req, res, next) => {
+  try {
+    const { flick_id, type, user } = req.params;
+    const userFlickList = await flickList.findOne({ user });
+    if (type === "movie") {
+      await userFlickList.movieList.id(flick_id).remove();
+      userFlickList.save({ validateBeforeSave: false });
+    }
+    if (type === "show") {
+      await userFlickList.showList.id(flick_id).remove();
+      userFlickList.save({ validateBeforeSave: false });
+    }
+
     res.status(200).json({
-      error,
+      success: true,
+      message: "deleted",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.resetFlickList = async (req, res, next) => {
+  try {
+    console.log(req.params.id);
+
+    let { id } = req.params;
+    await flickList.findByIdAndDelete(id);
+    res.status(200).json({
+      success: true,
+      message: "your flick list has been reset",
+    });
+  } catch (error) {
+    next(error);
   }
 };
