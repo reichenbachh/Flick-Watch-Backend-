@@ -11,7 +11,7 @@ const TrackedShowSchema = new mongoose.Schema({
   },
 
   language: { type: String, default: "none" },
-  air_date: { type: String },
+  air_date: { type: String, default: "none" },
   vote_average: { type: String },
   poster_path: { type: String },
   backdrop_path: { type: String },
