@@ -4,8 +4,8 @@ const sendMail = require("../utils/emailSender");
 const crypto = require("crypto");
 
 //@register POST
-//@route POST flickApi/v1/auth/regitser
-//@acess Public
+//@route    POST flickApi/v1/auth/regitser
+//@acess    Public
 exports.registerUser = async (req, res, next) => {
   try {
     const { email, username, password } = req.body;
@@ -29,10 +29,6 @@ exports.registerUser = async (req, res, next) => {
     //create token
     const token = user.getSignedJWTtoken();
     sendCookieResponse(200, token, res);
-    // res.status(201).json({
-    //   success: true,
-    //   token,
-    // });
 
     //handle other errors
   } catch (error) {
@@ -90,10 +86,13 @@ exports.loginUser = async (req, res, next) => {
   }
 };
 
+//Logs out the user
+//sets http token to an empty string
 exports.logOutUser = async (req, res, next) => {
   sendclearCookiesResponse(200, res);
 };
 
+//validate http token, extratcs user id from token and validates with the database
 exports.getLoggedInUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.id);
@@ -108,9 +107,11 @@ exports.getLoggedInUser = async (req, res, next) => {
   }
 };
 
+//requests for a password change
 exports.sendResetEmail = async (req, res, next) => {
   try {
     const email = req.body.email;
+    //check if email exists in database
     if (!email) {
       next(
         new ErrorResponse("Please enter your flick watch email address", 404)
@@ -118,10 +119,12 @@ exports.sendResetEmail = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email });
+    //if user doesnt exist send error message to client
     if (!user) {
       next(new ErrorResponse("This user does not exits", 404));
     }
 
+    //creates redirect url with a reset token
     const token = user.createResetToken();
     user.save({ validateBeforeSave: false });
     const resetUrl = `http://localhost:3000/passwordReset/${token}`;
@@ -155,7 +158,6 @@ exports.resetPassword = async (req, res, next) => {
       .update(reqToken)
       .digest("hex");
 
-    console.log(hashedToken);
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() },
@@ -168,6 +170,7 @@ exports.resetPassword = async (req, res, next) => {
     //set new password
     const password = req.body.password;
 
+    //set new password and all other password check credentials to undefined
     user.password = password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
@@ -186,7 +189,10 @@ const sendclearCookiesResponse = (statusCode, res) => {
     expires: new Date(
       Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
     ),
+    domain: "https://flickwatch.netlify.app",
     httpOnly: true,
+    sameSite: "none",
+    secure: true,
   };
 
   res.clearCookie("token", options).json({
@@ -201,7 +207,10 @@ const sendCookieResponse = (statusCode, token, res) => {
     expires: new Date(
       Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
     ),
+    domain: "https://flickwatch.netlify.app",
     httpOnly: true,
+    sameSite: "none",
+    secure: true,
   };
   res.cookie("token", token, options).status(statusCode).json({
     success: true,

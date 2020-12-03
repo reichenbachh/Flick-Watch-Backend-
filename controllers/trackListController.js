@@ -1,7 +1,9 @@
 const flickList = require("../models/flickList");
 
+//@register GET
+//@route    GETflickApi/v1/flickList/getMyFlickList/:user
+//@acess    Private
 exports.getFlickList = async (req, res, next) => {
-  console.log(req.params.user);
   try {
     const userflickList = await flickList.findOne({ user: req.params.user });
     if (!userflickList) {
@@ -19,6 +21,9 @@ exports.getFlickList = async (req, res, next) => {
   }
 };
 
+//@register POST
+//@route    POST flickApi/v1/flickList/newFlickTrack
+//@acess    Private
 exports.trackFlick = async (req, res, next) => {
   try {
     let { user, payloadName, payloadData, tmdb_id } = req.body;
@@ -33,9 +38,28 @@ exports.trackFlick = async (req, res, next) => {
     }
 
     if (listExists && payloadName === "show") {
+      for (let i = 0; i < listExists.showList.length; i++) {
+        if (listExists.showList[i].tmdb_id === payloadData.tmdb_id.toString()) {
+          return res.status(401).json({
+            sucess: false,
+            error: "you are already tracking this show",
+          });
+        }
+      }
       listExists.showList.push(payloadData);
       listExists.save({ validateBeforeSave: false });
     } else if (listExists && payloadName === "movie") {
+      //loop through users movie list and check if it already exists
+      for (let i = 0; i < listExists.movieList.length; i++) {
+        if (
+          listExists.movieList[i].tmdb_id === payloadData.tmdb_id.toString()
+        ) {
+          return res.status(401).json({
+            sucess: false,
+            error: "you are already tracking this movie",
+          });
+        }
+      }
       listExists.movieList.push(payloadData);
       listExists.save({ validateBeforeSave: false });
     }
@@ -49,6 +73,9 @@ exports.trackFlick = async (req, res, next) => {
   }
 };
 
+//@register DELETE
+//@route    DELETE flickApi/v1/flickList/id
+//@acess    Private
 exports.deleteFromFlickList = async (req, res, next) => {
   try {
     const { flick_id, type, user } = req.params;
@@ -71,6 +98,9 @@ exports.deleteFromFlickList = async (req, res, next) => {
   }
 };
 
+//@register DELETE
+//@route    DELETE //flickApi/v1/flickList
+//@acess    Private
 exports.resetFlickList = async (req, res, next) => {
   try {
     console.log(req.params.id);
@@ -79,7 +109,7 @@ exports.resetFlickList = async (req, res, next) => {
     await flickList.findByIdAndDelete(id);
     res.status(200).json({
       success: true,
-      message: "your flick list has been reset",
+      message: "your flick list has been deleted",
     });
   } catch (error) {
     next(error);

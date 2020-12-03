@@ -2,8 +2,9 @@ const jwt = require("jsonwebtoken");
 
 module.exports = function (req, res, next) {
   const token = req.cookies.token;
-
+  console.log(req.console);
   if (!token) {
+    console.log("no cookie");
     return res.status(401).json({
       success: false,
       error: "No token",

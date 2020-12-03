@@ -7,6 +7,7 @@ const db = require("./config/db");
 const cors = require("cors");
 const errorHanlder = require("./middleware/error");
 const User = require("./models/Users");
+const { shouldSendSameSiteNone } = require("should-send-same-site-none");
 
 //load environment variables
 dotenv.config({ path: "./config/config.env" });
@@ -20,8 +21,9 @@ app.use(cookie());
 //Json Body parser
 app.use(express.json());
 
+//"https://flickwatch.netlify.app"
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "https://flickwatch.netlify.app",
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
 };
